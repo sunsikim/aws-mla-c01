@@ -20,10 +20,10 @@ Regardless of security settings enabled by bucket policy, if *Block public acces
 
 [AWS Policy generator](https://awspolicygen.s3.amazonaws.com/policygen.html) can be used to generate JSON string that contains following items to specify permitted IAM user, role and corresponding actions.
 
-* Resource : bucket or objects specified by ARN
-* Effect : Allow / Deny
-* Action : API action to allow or deny(ex. s3:GetObject)
-* Principal : account or user to apply policy
+* **Resource** : bucket or objects specified by ARN
+* **Effect** : Allow / Deny
+* **Action** : API action to allow or deny(ex. s3:GetObject)
+* **Principal** : account or user to apply policy
 
 ### Encryption
 
@@ -31,10 +31,22 @@ Regardless of security settings enabled by bucket policy, if *Block public acces
 
 ## 2. Data Backup
 
-
+Protecting data from potential loss is essential for compliance, so this topic shold not be neglected.
 
 ### Versioning
 
+Provides easy way to rollback deletion, so prevents unintended data loss.
 
+* **Bucket level** : Enabling versioning object by object (X) Every object in the bucket is versioned (O)
+* **Version ID** : When uploading an object with same key, existing object is not deleted by overwriting. Instead, version ID for existing object is created(fyi, initial version ID for any object is null)
+* **Delete marker** : If you delete an object, it just leaves delete marker. Deletion can be undone by deleting this delete marker. However, if you delete a version, this is permanent delete.
 
 ### Replication
+
+Must enable versioning in both source and target buckets. Target bucket can be a bucket of different account. Replication happens asynchronously(i.e. it takes a few seconds)
+
+* **Bucket region** : If region of source and target buckets are different, it's cross region replication(CRR), otherwise same region replication
+    * **CRR** : make copy of a data to prevent potential data loss occur in a region(such fault tolerance is essential for compliance)
+    * **SRR** : create a sandbox environment(i.e. dev, staging environment)
+* **Optional delete marker replication** : Default replication behavior is to ignore any deletion from source bucket. Delete marker can be replicated, but permanent delete is not replicated.
+* **New objects only** : Replication starts from the time of replication rule definition. To replicate existing objects in source bucket, use *S3 Batch replication* service.
