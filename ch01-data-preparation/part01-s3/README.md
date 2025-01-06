@@ -8,7 +8,7 @@
 1. [Security](#1-security)
     * [JSON Policy Format](#json-policy-format)
     * [Encryption](#encryption)
-1. [Data Backup](#2-data-backup)
+1. [Backup](#2-data-backup)
     * [Versioning](#versioning)
     * [Replication](#replication)
 1. [Optimizations](#3-optimizations)
@@ -33,9 +33,19 @@ Regardless of security settings enabled by bucket policy, if *Block public acces
 
 ### Encryption
 
+Can be categorized into two items depending on who does the encryption and decryption: Server-side(SSE) and client side. Can set IAM policy to enforce certain encryption/decryption option(ex. [SSE-KMS policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html#require-sse-kms)).
 
+* **SSE-S3** : (Default) Uses encryption key that AWS owns and manages
+* **SSE-KMS**
+    * Encryption key stored in KMS(Key MAnagement Service) is used for encryption/decryption.
+    * KMS has its own usage limit for each region, so usage can be limited by this quota.
+* **SSE-C**
+    * Encryption key is delievered within PUT request header, and never stored in AWS. 
+    * Same key has to be provided when sending GET request to the S3.
+* Client-side Encryption : User encrypts/decrypts the data by himself and upload/download the data to/from S3
+* **aws:SecureTransport** : User can set IAM policy to deny PUT request that uses unsafe HTTP protocol.
 
-## 2. Data Backup
+## 2. Backup
 
 Protecting data from potential loss is essential for compliance, so this topic shold not be neglected.
 
@@ -80,10 +90,10 @@ Depending on access frequency, user can select object-by-object storage class am
 
 ### Performance Optimization
 
-* Gurantees at least 3,500 PUT/POST/DELETE/COPY API response per second for each prefix
+* S3 Gurantees at least 3,500 PUT/POST/DELETE/COPY API response per second for each prefix
     * **multi part upload** : divide big file into small sub-parts and upload each in parallel(recommended for 100MB+ file, required for 5GB+ file)
     * **transfer acceleration** : useful when uploading file to bucket in different region(compatible with multi part upload); first upload file into edge location in the same region, then transfer the data to target bucket using private AWS network
-* Gurantees at least 5,500 GET/HEAD API response per second for each prefix
+* S3 Gurantees at least 5,500 GET/HEAD API response per second for each prefix
     * **Byte range fetches** : parallelize GET request by requesting specific byte range in parallel
 
 ## 4. Utilities
@@ -98,3 +108,8 @@ Used to trigger designated operation when certain S3 API is called(ex. s3:Object
 
 ### Access Points
 
+Unlike IAM policy which is basically subject(principal) based statement, access point and corresponding access point policy enables object(resource) based control. This enables more granular control over the objects, which would have only possible by creating multiple buckets.
+
+* **point by point policy** : Similar to bucket policy, access point policy sets the list of allowed action on the object with the designated policy.
+* **point by point DNS name** : Data with certain prefix can only be accessed through specific network paths, therefore provides more isolated S3 environment for each team or workflow.
+* **object lambda** : Define AWS Lambda function to transform the object before it is retrieved by the caller application, while application retrieves the transformed object from Lambda access point.
