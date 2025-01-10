@@ -1,6 +1,6 @@
-# Data Preparation
+# Data Ingestion and Storage
 
-Basic concepts to define properties of data and therefore determine right format of data to hold information and storage system to use
+Before diving into specific services, basic concepts to define properties of data and therefore determine right format of data to hold information and storage system to use are discussed.
 
 1. [Properties of Data](#1-properties-of-data)
 1. [Common Data Formats](#2-common-data-formats)

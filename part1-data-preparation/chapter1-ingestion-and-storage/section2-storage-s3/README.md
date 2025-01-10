@@ -5,47 +5,20 @@
 * Single *object* can be up to 5TB. However, if single *object* is larger than 5GB, *multi part upload* must be used
 * Object can include metadata such as tags and version ID.
 
-1. [Security](#1-security)
-    * [JSON Policy Format](#json-policy-format)
-    * [Encryption](#encryption)
 1. [Backup](#2-data-backup)
-    * [Versioning](#versioning)
-    * [Replication](#replication)
+    * [Versioning](#versioning) : (1) Bucket level (2) Version ID (3) Delete marker
+    * [Replication](#replication) : (1) Bucket region (2) Optional delete marker replication (3) New objects only
 1. [Optimizations](#3-optimizations)
-    * [Cost Optimization](#cost-optimization)
-    * [Performance Optimization](#performance-optimization)
+    * [Cost Optimization](#cost-optimization) : (1) storage classes (2) intelligent tiering (3) lifecycle rule
+    * [Performance Optimization](#performance-optimization) : (1) multi-part upload (2) transfer acceleration (3) byte-range fetches
+1. [Security](#1-security)
+    * [JSON Policy Format](#json-policy-format) : REAP(Resource, Effect, Action, Principal)
+    * [Encryption](#encryption) : (1) SSE-S3, KMS, C (2) Client-side encryption (3) aws:SecureTransport
 1. [Utilities](#4-utilities)
-    * [Event Notifications](#event-notifications)
-    * [Access Points](#access-points)
+    * [Event Notifications](#event-notifications) : (1) SNS, SQS, Lambda trigger (2) AWS EventBridge
+    * [Access Points](#access-points) : (1) point-by-point policy, DNS name (2) Object lambda
 
-## 1. Security
-
-Regardless of security settings enabled by bucket policy, if *Block public access* is enabled, any publicly opened roles or polices are ignored. This is a additional safety layer that prevents potential data leak which can be caused by mistakes.
-
-### JSON Policy Format
-
-[AWS Policy generator](https://awspolicygen.s3.amazonaws.com/policygen.html) can be used to generate JSON string that contains following items to specify permitted IAM user, role and corresponding actions.
-
-* **Resource** : bucket or objects specified by ARN
-* **Effect** : Allow / Deny
-* **Action** : API action to allow or deny(ex. s3:GetObject)
-* **Principal** : account or user to apply policy
-
-### Encryption
-
-Can be categorized into two items depending on who does the encryption and decryption: Server-side(SSE) and client side. Can set IAM policy to enforce certain encryption/decryption option(ex. [SSE-KMS policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html#require-sse-kms)).
-
-* **SSE-S3** : (Default) Uses encryption key that AWS owns and manages
-* **SSE-KMS**
-    * Encryption key stored in KMS(Key MAnagement Service) is used for encryption/decryption.
-    * KMS has its own usage limit for each region, so usage can be limited by this quota.
-* **SSE-C**
-    * Encryption key is delievered within PUT request header, and never stored in AWS. 
-    * Same key has to be provided when sending GET request to the S3.
-* Client-side Encryption : User encrypts/decrypts the data by himself and upload/download the data to/from S3
-* **aws:SecureTransport** : User can set IAM policy to deny PUT request that uses unsafe HTTP protocol.
-
-## 2. Backup
+## 1. Backup
 
 Protecting data from potential loss is essential for compliance, so this topic shold not be neglected.
 
@@ -67,7 +40,7 @@ Must enable versioning in both source and target buckets. Target bucket can be a
 * **Optional delete marker replication** : Default replication behavior is to ignore any deletion from source bucket. Delete marker can be replicated, but permanent delete is not replicated.
 * **New objects only** : Replication starts from the time of replication rule definition. To replicate existing objects in source bucket, use *S3 Batch replication* service.
 
-## 3. Optimizations
+## 2. Optimizations
 
 Reliability of S3 storage can be expressed by following measures
 
@@ -95,6 +68,33 @@ Depending on access frequency, user can select object-by-object storage class am
     * **transfer acceleration** : useful when uploading file to bucket in different region(compatible with multi part upload); first upload file into edge location in the same region, then transfer the data to target bucket using private AWS network
 * S3 Gurantees at least 5,500 GET/HEAD API response per second for each prefix
     * **Byte range fetches** : parallelize GET request by requesting specific byte range in parallel
+
+## 3. Security
+
+Regardless of security settings enabled by bucket policy, if *Block public access* is enabled, any publicly opened roles or polices are ignored. This is a additional safety layer that prevents potential data leak which can be caused by mistakes.
+
+### JSON Policy Format
+
+[AWS Policy generator](https://awspolicygen.s3.amazonaws.com/policygen.html) can be used to generate JSON string that contains following items to specify permitted IAM user, role and corresponding actions.
+
+* **Resource** : bucket or objects specified by ARN
+* **Effect** : Allow / Deny
+* **Action** : API action to allow or deny(ex. s3:GetObject)
+* **Principal** : account or user to apply policy
+
+### Encryption
+
+Can be categorized into two items depending on who does the encryption and decryption: Server-side(SSE) and client side. Can set IAM policy to enforce certain encryption/decryption option(ex. [SSE-KMS policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html#require-sse-kms)).
+
+* **SSE-S3** : (Default) Uses encryption key that AWS owns and manages
+* **SSE-KMS**
+    * Encryption key stored in KMS(Key MAnagement Service) is used for encryption/decryption.
+    * KMS has its own usage limit for each region, so usage can be limited by this quota.
+* **SSE-C**
+    * Encryption key is delievered within PUT request header, and never stored in AWS. 
+    * Same key has to be provided when sending GET request to the S3.
+* **Client-side Encryption** : User encrypts/decrypts the data by himself and upload/download the data to/from S3
+* **aws:SecureTransport** : User can set IAM policy to deny PUT request that uses unsafe HTTP protocol.
 
 ## 4. Utilities
 
