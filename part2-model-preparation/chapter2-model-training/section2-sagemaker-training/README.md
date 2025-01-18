@@ -1,15 +1,23 @@
 # Model Training on SageMaker
 
+Successful model training consists of Preprocess, Training and Tuning jobs. Sagemaker provides management tools for these jobs, whose workflow can be summarized as below.
+
+1. Raw data in S3 + Processing code image in ECR -> S3 URL of converted training data(ex. protobuf)
+1. Training data in S3 + Training code image in ECR -> Sagemaker Training(model artifact saved in S3)
+1. Model artifact in S3 + persistent endpoint -> make individual predictions
+1. Model artifact in S3 + Sagemaker Batch Transform -> batch inference
+
 This section covers list of service user can use with different complexity level.
 
-1. [SageMaker Canvas](#sagemaker-canvas)
-1. [SageMaker Autopilot](#sagemaker-autopilot)
-1. [SageMaker Jumpstart](#sagemaker-jumpstart)
-1. [SageMaker Training Job](#sagemaker-training-job)
-    1. [SageMaker Model Registry](#sagemaker-model-registry)
-    1. [Automatic Model Tuning](#automatic-model-tuningamt)
-    1. [Monitoring](#monitoring)
-    1. [Distributed Training](#distributed-training)
+1. [SageMaker Canvas](#sagemaker-canvas) : modeling by drag-and-drop
+1. [SageMaker Autopilot](#sagemaker-autopilot) : automatic training/tuning for tabular data
+1. [SageMaker Jumpstart](#sagemaker-jumpstart) : pretrained/foundation model aggregator
+1. [SageMaker Training Job](#sagemaker-training-job) : most flexible way to train a custom model
+    * [SageMaker Input Mode](#sagemaker-input-mode)
+    * [SageMaker Model Registry](#sagemaker-model-registry)
+    * [Automatic Model Tuning](#automatic-model-tuningamt)
+    * [Monitoring](#monitoring)
+    * [Distributed Training](#distributed-training)
 
 ## SageMaker Canvas
 
@@ -36,7 +44,7 @@ This solution is integrated with *SageMaker Clarify* which provides feature impo
 
 ## SageMaker Jumpstart
 
-Next simplest way to train a model is to use notebook environment. Using *SageMaker Studio*, user can select instance type, install everything inside the notebook(safe to say that this is Google colab equivalent of AWS). Combined with *SageMaker Jumpstart*, which provide suite of pretrained models for various task including text (encoding/generation/summarization) and image (encoding/segmentation), user can either use the pretrained model as is or tune the model seamlessly.
+Next simplest way to train a model is to use notebook environment. Using *SageMaker Studio*, user can select instance type, install everything inside the notebook(safe to say that this is Google colab equivalent of AWS). Combined with *SageMaker Jumpstart*, which provide suite of pretrained (foundational) models for various task including text (encoding/generation/summarization) and image (encoding/segmentation), user can either use the pretrained model as is or tune the model seamlessly. Model comes from various source including Huggingface, Stability AI and Amazon(ex. Titan, Alexa).
 
 ## SageMaker Training Job
 
@@ -46,6 +54,17 @@ Lowest level for model training is to
 1. let SageMaker run the code within configured type of instance by creating Training job. 
 
 Since this provides most flexible way to train a model, there are various options to consider.
+
+### Sagemaker Input mode
+
+There are several options to feed data during training job.
+
+* S3 based : can optimize performance using *S3 express one zone*.
+    * **S3 File Mode** : (default) copies data into Docker container(has to wait for copy process, and container image gets heavy)
+    * **S3 Fast File Mode** : no copy but feed data as stream(works best with sequential data access; not random access)
+* Network storage based : requires VPC for data transfer
+    * **FSx Lustre** : suitable for training job that requires low latency with 100GB+ throughput in a single AZ
+    * **EFS** : when data is stored in EFS
 
 ### SageMaker Model Registry
 
