@@ -1,6 +1,4 @@
-# ECS(Elastic Container Service) Topics
-
-(Sagemaker Dockerfile grammars)
+# ECS(Elastic Container Service) topics
 
 AWS native container orchestration service. No fine grained services like Kubernets control plane or helm chart, but simpler to use because AWS manages task scheduling and container placement.
 
@@ -10,21 +8,25 @@ Other alternative is EKS, a container orchestration service based on AWS managed
 * need multi-cloud compatibility
 * requires advanced storage class like FSx for Lustre
 
-## Use case classification
+## Infrastructure as Code
+
+CloudFormation or AWS CDK can be useful tool when configuring infrastructure ECS environment.
+
+* **CloudFormation** : combined with *AWS Infrastructure Composer*, user can define infrastructure in JSON or YAML
+* **AWS CDK** : wrapper for CloudFormation which compiles Python/Java/TS/.NET code as CloudFormation template using `cdk synth`
+
+## Use cases
 
 Task defined within docker container can be classified as following categories.
 
 ### Batch job
 
-User can leverage AWS Batch to trigger execution of batch jobs defined as Docker images. This serverless service includes following features:
+User can leverage *AWS Batch* to trigger execution of batch jobs defined as Docker images. This serverless service includes following features:
 
 * only pay for underlying EC2 instances provisioned dynamically
-* scheduled using CloudWatch Events and orchestrated by AWS Step functions defined by ASL(Amazon State Language) or MWAA(schedulers and workers are AWS Fargate containers, too!)
+* scheduled using CloudWatch Events and orchestrated by *AWS Step* functions defined by ASL(Amazon State Language) or MWAA(schedulers and workers are AWS Fargate containers, too!)
 
-Note the difference between batch job that Glue provides.
-
-* Batch job that Glue executes is primarily oriented to ETL tasks, which only includes Spark, Scala or Python code.
-* Batch job that AWS Batch executes can be any computing job, so it has more general purpose usage. It only requires Docker image that defines the job.
+Don't confuse this with batch job functionality that AWS Glue provides. It is primarily oriented to ETL tasks, which only includes Spark, Scala or Python code whereas AWS Batch is more general in that it executes any computing job and only requires Docker image that defines the job.
 
 ### Inference job
 
@@ -32,7 +34,6 @@ In this scenario, keyword to keep in mind would be *load balancing*. This concep
 
 * **Application Load Balancer** : go-to choice for most use cases
 * **Network Load Balancer** : recommended only when high throuput is required, or when pairing with AWS Private link
-
 
 ## Launch Types
 
