@@ -1,6 +1,19 @@
-* CloudTrail vs CloudWatch
-    * CloudTrail to log API and user activity within SageMaker and save as S3 object
-    * CloudWatch to log, monitor and alarm on invocation of endpoints and health of nodes
+# CloudTrail vs CloudWatch vs Config
+
+* CloudTrail 
+    * record API calls made within your account by everyone on everything
+    * therefore, it is a global service
+    * can define trails for specific resources
+* CloudWatch 
+    * Performance monitoring(metrics, CPU, network) & dashboards
+    * events & alerting
+    * log aggregation & analysis
+* Config
+    * set AWS managed compliance rules or define custom rule using AWS Lambda
+    * evaluate resources against compliance rules and make notification if any change occurs
+    * record configuration changes and get timeline of changes
+
+to log, monitor and alarm on invocation of endpoints and health of nodes
 
 ## CloudWatch
 
@@ -11,7 +24,7 @@
 * CloudWatch Logs: choice for collecting application log(destination can be S3, Kinesis Data Streams etc)
     * sources : ECS, Lambda , API Gateway, Route53...
     * subscription filter : filter which logs of interest and send to various destination(ex. Kinesis Data Streams)
-    * cloudwatch logs insights : querying functionality
+    * Cloudwatch Logs Insights : querying functionality
 * CloudWatch Logs Agent : To create log from EC2 instances, this agent must be running on the instance
     * This means that logs from EC2 cannot be sent to CloudWatch by default.
     * Latest version is CloudWatch Unified Agent, which collects additional system-level metrics like RAM, processes etc(+ centralized configuration using SSM paramter store)
@@ -33,3 +46,11 @@ Enabled by default to get an history of events/API calls made using console, SDK
 * management events : configured to log management events and read/write events.
 * data events : however, events regarding data(ex. logs on S3 objects, Lambda function execution) are not logged by default, because of its high volume nature
 * CloudTrail insights : if enabled, it detects unusual write activity(ex. abnormal resource provisioning)
+
+## Config
+
+Other sophisticated auditing adn recording compliance of AWS resources
+
+* per-region service, but can be aggregated
+* receive alert for any detected changes
+* should set AWS managed config rules(over 75) or custom config rules using AWS lambda
