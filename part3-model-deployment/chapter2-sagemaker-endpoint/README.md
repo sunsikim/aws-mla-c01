@@ -38,7 +38,11 @@ Sagemaker provides asynchronous real-time inference endpoints for following stra
 
 ## Monitoring
 
-* SageMaker model monitor : tool to monitor deployed model's usage and performance(contains performance history, detect anomalies etc)
+* SageMaker model monitor : tool to monitor deployed model's usage, performance(contains performance history, detect anomalies etc) and emit metrics to CloudWatch which integrates with Sagemaker studio, Tensorboard etc
+* Sagemaker Clarify : tools to detect potential bias(i.e. imbalance within data), drift in data or model quality
+    * Partial Dependence Plots(PDP) : marginal 2D plots that feature value is in x-axis and target prediction value is y-axis to display how feature values influence the prediction
+    * SHAP values : what Clarify utilzes under the hood to determine the contribution of each feature toward a model's prediction(Shapely : brute-force mechanism to compare huge amount of sets of features; SHAP : approximate version of it)
+    * Asymmetric Shapely values : shapely values for time series data
 * SageMaker model monitor data capture : used to store request-response log data in S3
 
 ## CI/CD
